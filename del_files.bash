@@ -1,0 +1,1 @@
+ls -U | head -1816 | xargs rm -rf
