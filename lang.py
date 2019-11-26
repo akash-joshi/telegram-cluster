@@ -1,33 +1,79 @@
+from whatthelang import WhatTheLang
+from bs4 import BeautifulSoup
+from os import listdir
 import time
 start_time = time.time()
 
-from os import listdir
-from os.path import isfile, join
-import pathlib
-from bs4 import BeautifulSoup
 
-mypath = "./00"
-dirs = listdir(mypath)
+wtl = WhatTheLang()
 
-def path_relative(f):
-  return_dict = {}
-  return_dict["fname"] = f
-  return_dict["path"] = mypath + "/" + f
-  return return_dict
+en_array = []
+ru_array = []
 
-def get_title(file):
-  with open(file["path"]) as fp:
-    soup = BeautifulSoup(fp, "html.parser")
-    title = soup.find("meta",  property="og:title")
-    return_dict = {}
-    return_dict["title"] = title["content"] if title else "No meta title given"
-    return_dict["fname"] = file["fname"]
-    return_dict["path"] = file["path"]
-    return return_dict
 
-joined_dirs = map(path_relative, dirs)
-# print(joined_dirs)
+def print_main(mypath):
+    def get_title(file):
+        path = mypath + "/" + file
+        with open(path) as fp:
+            soup = BeautifulSoup(fp, "lxml")
+            title = soup.find("meta",  property="og:title")
+            lang = wtl.predict_lang(title["content"])
+            if lang == "ru":
+                ru_array.append(file)
+            if lang == "en":
+                en_array.append(file)
 
-print(list(map(get_title, joined_dirs)))
+    dirs = listdir(mypath)
 
-print("--- %s seconds ---" % (time.time() - start_time))
+    list(map(get_title, dirs))
+    return_list = []
+
+    en_return = {}
+    en_return["lang_code"] = "en"
+    en_return["articles"] = en_array
+    return_list.append(en_return)
+
+    ru_return = {}
+    ru_return["lang_code"] = "ru"
+    ru_return["articles"] = ru_array
+    return_list.append(ru_return)
+
+    print(return_list)
+    print("--- %s seconds ---" % (time.time() - start_time))
+
+
+def main(mypath):
+    def get_title(file):
+        path = mypath + "/" + file
+        with open(path) as fp:
+            soup = BeautifulSoup(fp, "lxml")
+            title = soup.find("meta",  property="og:title")
+            lang = wtl.predict_lang(title["content"])
+            if lang == "ru":
+                more_data = {}
+                more_data["file"] = file
+                more_data["path"] = path
+                ru_array.append(more_data)
+            if lang == "en":
+                more_data = {}
+                more_data["file"] = file
+                more_data["path"] = path
+                en_array.append(more_data)
+
+    dirs = listdir(mypath)
+
+    list(map(get_title, dirs))
+    return_list = []
+
+    en_return = {}
+    en_return["lang_code"] = "en"
+    en_return["articles"] = en_array
+    return_list.append(en_return)
+
+    ru_return = {}
+    ru_return["lang_code"] = "ru"
+    ru_return["articles"] = ru_array
+    return_list.append(ru_return)
+    print("--- %s seconds ---" % (time.time() - start_time))
+
+    return return_list

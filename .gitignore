@@ -1,2 +1,3 @@
-00/
 venv/
+*.html
+__pycache__/
