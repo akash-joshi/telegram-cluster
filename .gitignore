@@ -1,3 +1,5 @@
 venv/
 *.html
 __pycache__/
+build/
+dist/
